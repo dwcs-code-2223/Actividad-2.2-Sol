@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html>
+    <head>
+        <title>Calificación 2ª evaluación</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form action="http://localhost/dwcs/ud2/Actividad2.1/redondeo/redondeo.php" method="post">
+            <p>
+                <label for="cal_ud5">Calificación UD5</label>
+                <input type="number" name="cal_ud5" id="cal_ud5" step="0.01" min="0" max="10" required>
+                
+                
+            </p>
+            
+                      <p>
+                <label for="cal_ud6">Calificación UD6</label>
+                <input type="number" name="cal_ud6" id="cal_ud6" step="0.01" min="0" max="10" required>
+                
+                
+            </p>
+            
+                   <p>
+                <label for="tareas_ap_alumno">Número de tareas aprobadas y entregadas por el alumno/a</label>
+                <input type="number" name="tareas_ap_alumno" id="tareas_ap_alumno"  min="0" max="7" required>
+                
+                
+            </p>
+            
+            <p><input type="submit" value="Calcular calificación 2ª evaluación"></p>
+            
+        </form>
+    </body>
+</html>
