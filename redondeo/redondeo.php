@@ -16,8 +16,7 @@
 
         $peso_ud5_eval = PESO_UD5_CURSO / (PESO_UD5_CURSO + PESO_UD6_CURSO);
         $peso_ud6_eval = PESO_UD6_CURSO / (PESO_UD5_CURSO + PESO_UD6_CURSO);
-        $umbral_tareas = round(MAX_TAREAS_NOW / 2);
-        $mensaje = "";
+        
 
         echo "El peso de la ud5 en la 2ª eval es: $peso_ud5_eval <br/>";
         echo "El peso de la ud6 en la 2ª eval es: $peso_ud6_eval <br/>";
@@ -34,47 +33,65 @@
             }
         }
 
-        $media_ponderada = $cal_ud5 * $peso_ud5_eval +
-                $cal_ud6 * $peso_ud6_eval;
+        $media_ponderada = calcularMediaPonderada($cal_ud5, $cal_ud6,
+                $peso_ud5_eval, $peso_ud6_eval);//              
 
         echo "La media ponderada es: $media_ponderada";
 
         if ($cal_ud5 >= 4 && $cal_ud6 >= 4) {
             if ($media_ponderada >= 5) {
-                //alumno/a aprobado
-                if (
-                        ($media_ponderada - floor($media_ponderada)) != UMBRAL_REDONDEO) {
-                    $nota_eval = round($media_ponderada);
-                } else {
-                    //todo aprobado, 0.5 parte decimal
-                    if ($tareas_ap_alumno >= $umbral_tareas) {
-                        $nota_eval = round($media_ponderada);
-                    } else {
-                        $nota_eval = round($media_ponderada, 0, PHP_ROUND_HALF_DOWN);
-                        //$nota_eval = floor($media_ponderada);
-                    }
-                }
-            } elseif ($media_ponderada >= 4.5 && $media_ponderada < 5) {
-                $mensaje = "La calificación dependerá del criterio del redondeo.";
+                $nota_eval = redondear($media_ponderada, $tareas_ap_alumno, MAX_TAREAS_NOW);
+            } else {
+                $nota_eval = calcularCalEvalEnFuncionTareas($media_ponderada, $tareas_ap_alumno, MAX_TAREAS_NOW);
             }
         } else {
+            $nota_eval = calcularNotaEvalSuspensos($media_ponderada, $tareas_ap_alumno, MAX_TAREAS_NOW);
+        }
+
+        function calcularMediaPonderada(float $cal_ud_x, float $cal_ud_y, float $peso_ud_x, float $peso_ud_y): float {
+
+            return $cal_ud_x * $peso_ud_x + $cal_ud_y * $peso_ud_y;
+        }
+
+        function calcularCalEvalEnFuncionTareas(float $media_ponderada,
+                int $tareas_ap_alumno,
+                int $tareas_hasta_ahora): int {
+
+            $umbral_tareas = round($tareas_hasta_ahora / 2);
+            if ($tareas_ap_alumno >= $umbral_tareas) {
+                $nota_eval = round($media_ponderada);
+            } else {
+                //$nota_eval = floor($media_ponderada);
+                $nota_eval = floor($media_ponderada);
+                //var_dump($nota_eval);
+              
+            }
+
+            return $nota_eval;
+        }
+
+        function terminaEn05(float $media_ponderada): bool {
+            return (($media_ponderada - floor($media_ponderada)) == UMBRAL_REDONDEO);
+        }
+
+        function calcularNotaEvalSuspensos(float $media_ponderada, int $tareas_ap_alumno, int $max_tareas_ahora): int {
             if ($media_ponderada >= UMBRAL_APROBADO) {//4.5
                 $nota_eval = MAX_SUSPENSOS; //4
             } else {
                 //Repetimos la misma comprobación por si alumno tiene un 2.5
-                if (
-                        ($media_ponderada - floor($media_ponderada)) != UMBRAL_REDONDEO) {
-                    $nota_eval = round($media_ponderada);
-                } else {
-                    //todo aprobado, 0.5 parte decimal
-                    if ($tareas_ap_alumno >= $umbral_tareas) {
-                        $nota_eval = round($media_ponderada);
-                    } else {
-                        $nota_eval = round($media_ponderada, 0, PHP_ROUND_HALF_DOWN);
-                        //$nota_eval = floor($media_ponderada);
-                    }
-                }
+                $nota_eval = redondear($media_ponderada, $tareas_ap_alumno, MAX_TAREAS_NOW);
             }
+            return $nota_eval;
+        }
+
+        function redondear(float $media_ponderada, int $tareas_ap_alumno, int $max_tareas_ahora) {
+            if (!terminaEn05($media_ponderada)) {
+                $nota_eval = round($media_ponderada);
+            } else {
+                //suspenso con 0.5 en parte decimal
+                $nota_eval = calcularCalEvalEnFuncionTareas($media_ponderada, $tareas_ap_alumno, $max_tareas_ahora);
+            }
+            return $nota_eval;
         }
         ?>
 
@@ -88,7 +105,7 @@
                     <th>Cal. UD6</th>
                     <th>Media ponderada (sin redondear)</th>
                     <th>Calificación entera 2ª eval.</th>
-                    <th>Comentarios</th>
+               
                 </tr>
             </thead>
             <tbody>
@@ -96,8 +113,8 @@
                     <td><?php echo $cal_ud5 ?></td>
                     <td><?php echo $cal_ud6 ?></td>
                     <td><?php echo $media_ponderada ?></td>
-                    <td><?php if($mensaje=="") {echo $nota_eval;} ?></td>
-                    <td><?php echo $mensaje ?></td>
+                    <td><?php echo $nota_eval; ?></td>
+
                 </tr>
             </tbody>
         </table>
